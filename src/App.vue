@@ -1,51 +1,104 @@
 <template>
-  <div class="app-header">
-    <SearchComponent/>
-    <button class="add-user-button">ADD USER</button>
+  <Modal v-if="selectedUser" @closeModal="closeModal">
+    <UserDetails :user="selectedUser" @click.stop/>
+  </Modal>
+  <Modal v-else-if="newUserFormIsOpened" @closeModal="closeModal">
+    <NewUserForm @closeForm="closeModal" @reloadUsers="getUsersFromServer" @click.stop/>
+  </Modal>
+  <div class="app-container">
+    <div class="app-header">
+      <SearchComponent v-model="searchText" @clearSearchField="clearSearchField"/>
+      <button class="add-user-button" @click="openNewUserFrom">ADD USER</button>
+    </div>
+    <UsersList :users="filteredUsers" :removeUser="removeUser" :selectUser="selectUser"/>
   </div>
-  <UsersList :users="fetchedUsers" :removeUser="removeUser"/>
 </template>
 
 <script>
 import { deleteUser, getUsers } from '@/api/users';
-import { onMounted, ref } from 'vue';
+import { computed, onMounted, ref } from 'vue';
 import UsersList from '@/components/UsersList.vue';
 import SearchComponent from '@/components/SearchComponent.vue';
+import Modal from '@/components/Modal.vue';
+import UserDetails from '@/components/UserDetails.vue';
+import NewUserForm from '@/components/NewUserForm.vue';
 
 export default {
   name: 'App',
   components: {
+    NewUserForm,
+    UserDetails,
+    Modal,
     SearchComponent,
     UsersList,
   },
   setup() {
     const fetchedUsers = ref([]);
+    const searchText = ref('');
+    const selectedUser = ref(null);
+    const newUserFormIsOpened = ref(false);
 
-    onMounted(async() => {
+    const filteredUsers = computed(() => {
+      return fetchedUsers.value.filter(user => {
+        const userData = [user.name.toLowerCase(), user.email.toLowerCase()];
+        return userData.some(data => data.includes(searchText.value.toLowerCase()))
+      });
+    });
+
+    const getUsersFromServer = async () => {
+      const {data} = await getUsers();
+      fetchedUsers.value = data;
+    }
+
+    onMounted(() => {
       try {
-        const {data} = await getUsers();
-        console.log('data', data);
-        // fetchedUsers.value = data.data;
-        fetchedUsers.value = data;
+        getUsersFromServer();
       } catch(e) {
-        console.log('Some error occurred while data downloaded');
+        console.log('Error download users:', e);
       }
     })
 
     async function removeUser(userId) {
       try {
         await deleteUser(userId);
-        const {data} = await getUsers();
-        // fetchedUsers.value = data.data;
-        fetchedUsers.value = data;
+        await getUsersFromServer();
       } catch(e) {
-        console.log('Some error occurred while data downloaded');
+        console.log('Error download users:', e);
       }
+    }
+
+    function clearSearchField() {
+      searchText.value = '';
+    }
+
+    function selectUser(userId) {
+      const pickedUser = filteredUsers.value.find(user => {
+        return user.id === userId
+      });
+      selectedUser.value = pickedUser;
+    }
+
+    function closeModal() {
+      selectedUser.value = null;
+      newUserFormIsOpened.value = false;
+    }
+
+    function openNewUserFrom() {
+      newUserFormIsOpened.value = true;
     }
 
     return {
       fetchedUsers,
       removeUser,
+      searchText,
+      clearSearchField,
+      filteredUsers,
+      selectedUser,
+      selectUser,
+      closeModal,
+      openNewUserFrom,
+      newUserFormIsOpened,
+      getUsersFromServer,
     }
   }
 }
@@ -95,5 +148,6 @@ body {
   -moz-osx-font-smoothing: grayscale;
   text-align: center;
   color: #2c3e50;
+  min-width: 505px;
 }
 </style>

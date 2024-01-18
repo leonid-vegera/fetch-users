@@ -1,27 +1,27 @@
 <script>
-import { computed, reactive } from 'vue';
+import { reactive } from 'vue';
 
 export default {
   name: 'UserItem',
   props: {
     user: Object,
     removeUser: Function,
+    selectUser: Function,
   },
   setup(props) {
-    const {first_name, last_name, email, avatar, id, name} = reactive(props.user);
-    // const {removeUser} = reactive(props);
-    // const removeUser = inject('removeUser');
-    const fullName = computed(() => {
-      return `${first_name} ${last_name}`
-    })
+    const {email, avatar, id, name} = reactive(props.user);
+
+    const pickUser = () => {
+      props.selectUser(id)
+    }
 
     return {
-      fullName,
       email,
       avatar,
       id,
       name,
       deleteUser: () => props.removeUser(id),
+      pickUser,
     }
   }
 }
@@ -31,7 +31,7 @@ export default {
 <template>
 <div class="user-item">
   <div class="user-data">
-    <h1 class="user-name">{{name}}</h1>
+    <h1 class="user-name" @click="pickUser(id)" title="Click to get full information">{{name}}</h1>
     <p class="user-email">{{email}}</p>
   </div>
   <div class="user-images">
@@ -52,6 +52,7 @@ export default {
   border-radius: 20px;
   transition: all .7s ease;
   margin-bottom: 10px;
+  max-height: 143px;
 }
 
 .user-item:hover {
@@ -71,10 +72,20 @@ export default {
   }
 }
 
+.user-data {
+  min-width: 300px;
+}
+
 .user-name {
   font-size: 24px;
   font-weight: bold;
   margin: 10px 0;
+  cursor: pointer;
+  transition: all 0.5s;
+}
+
+.user-name:hover {
+  text-decoration: underline;
 }
 
 .user-email {
@@ -85,11 +96,13 @@ export default {
 .user-images {
   display: flex;
   align-items: center;
-  //gap: 15px;
   position: relative;
 }
 
 .user-image {
+  height: 128px;
+  width: 128px;
+  object-fit: cover;
   position: relative;
   border-radius: 50%;
   transition: all 0.9s ease;

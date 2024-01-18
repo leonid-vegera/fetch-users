@@ -1,9 +1,16 @@
 <script>
 export default {
   name: "SearchComponent",
-  setup() {
+  props: {
+    modelValue: String,
+  },
+  emit: ['clearSearchField'],
+  setup(props, context) {
+    function clearField() {
+      context.emit('clearSearchField', null);
+    }
     return {
-
+      clearField,
     }
   }
 }
@@ -16,15 +23,23 @@ export default {
     <input
         type="text"
         class='search-input'
-        placeholder='Enter text to find user'
+        placeholder='Enter name or email to find user'
+        :value="modelValue"
+        @input="$emit('update:modelValue', $event.target.value.trimLeft())"
     />
-    <font-awesome-icon :icon="['fas', 'xmark']" class='close-icon' />
+    <font-awesome-icon
+        :icon="['fas', 'xmark']"
+        v-show="modelValue"
+        class='close-icon'
+        @click="clearField"
+    />
   </div>
 </template>
 
 <style scoped>
 .search-section {
   width: 100%;
+  min-width: 220px;
   max-width: 40vw;
   display: flex;
   justify-content: space-between;
