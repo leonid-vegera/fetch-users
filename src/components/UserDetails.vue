@@ -9,8 +9,9 @@ export default {
   setup(props) {
     const {avatar, car, city, country, description, email, gender, id, name, phone} = reactive(props.user);
 
+    const image = avatar || 'https://t4.ftcdn.net/jpg/04/70/29/97/360_F_470299797_UD0eoVMMSUbHCcNJCdv2t8B2g1GVqYgs.jpg';
+
     return {
-      avatar,
       car,
       city,
       country,
@@ -19,7 +20,8 @@ export default {
       gender,
       id,
       name,
-      phone
+      phone,
+      image,
     }
   }
 };
@@ -29,7 +31,7 @@ export default {
   <section class="details-container">
     <h1 class="details-title">User details</h1>
     <div class="user-details">
-      <img :src="avatar" alt="User photo" class="details-avatar">
+      <img :src="image" alt="User photo" class="details-avatar">
       <div class="details-info">
         <div class="details-name">{{name}}</div>
         <div class="details-gender">{{gender}}</div>

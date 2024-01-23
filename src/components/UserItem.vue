@@ -15,13 +15,15 @@ export default {
       props.selectUser(id)
     }
 
+    const image = avatar || 'https://t4.ftcdn.net/jpg/04/70/29/97/360_F_470299797_UD0eoVMMSUbHCcNJCdv2t8B2g1GVqYgs.jpg';
+
     return {
       email,
-      avatar,
       id,
       name,
       deleteUser: () => props.removeUser(id),
       pickUser,
+      image,
     }
   }
 }
@@ -35,7 +37,7 @@ export default {
     <p class="user-email">{{email}}</p>
   </div>
   <div class="user-images">
-    <img :src="avatar" alt="" class="user-image">
+    <img :src="image" alt="" class="user-image">
     <font-awesome-icon class="user-remove" :icon="['fas', 'trash-can']" @click="deleteUser(id)" />
   </div>
 </div>
